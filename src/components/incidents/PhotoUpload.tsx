@@ -1,7 +1,7 @@
 'use client'
 
 import { useRef, useState } from 'react'
-import { axiosInstance } from '@/lib/axios'
+import { axiosInstance, BASE_URL } from '@/lib/axios'
 import { Button } from '@/components/ui/button'
 import { useQueryClient } from '@tanstack/react-query'
 import { useRole } from '@/hooks/useRole'
@@ -9,7 +9,6 @@ import { getListPhotosV1IncidentsIncidentIdPhotosGetQueryKey } from '@/api/gener
 
 interface Photo {
   id: string
-  file_path: string
   uploaded_at: string
 }
 
@@ -91,7 +90,7 @@ export function PhotoUpload({ incidentId, photos }: PhotoUploadProps) {
           {photos.map((photo) => (
             <div key={photo.id} className="group relative">
               <img
-                src={`http://localhost:8000/uploads/${photo.file_path}`}
+                src={`${BASE_URL}/v1/incidents/${incidentId}/photos/${photo.id}/file`}
                 alt="Фото инцидента"
                 className="h-32 w-full rounded object-cover border border-[#27272a]"
               />
