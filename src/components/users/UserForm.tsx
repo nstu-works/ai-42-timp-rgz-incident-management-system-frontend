@@ -4,6 +4,8 @@ import { useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useRouter } from 'next/navigation'
+import { useQueryClient } from '@tanstack/react-query'
+import { toast } from 'sonner'
 import {
   createUserSchema,
   updateUserSchema,
@@ -26,12 +28,13 @@ import {
   SelectContent,
   SelectItem,
   SelectTrigger,
-  SelectValue,
 } from '@/components/ui/select'
 import { ErrorAlert } from '@/components/shared/ErrorAlert'
 import {
   useCreateUserV1UsersPost,
   useUpdateUserV1UsersUserIdPatch,
+  getListUsersV1UsersGetQueryKey,
+  getGetUserV1UsersUserIdGetQueryKey,
 } from '@/api/generated/users/users'
 import type {
   UserCreate,
@@ -46,6 +49,7 @@ interface UserFormProps {
 
 export function UserForm({ defaultValues, userId }: UserFormProps) {
   const router = useRouter()
+  const queryClient = useQueryClient()
   const [error, setError] = useState<string | null>(null)
 
   const createMutation = useCreateUserV1UsersPost()
@@ -83,6 +87,11 @@ export function UserForm({ defaultValues, userId }: UserFormProps) {
           is_active: v.is_active ?? null,
         }
         await updateMutation.mutateAsync({ userId, data: updateData })
+        await queryClient.invalidateQueries({ queryKey: getListUsersV1UsersGetQueryKey() })
+        await queryClient.invalidateQueries({ queryKey: getGetUserV1UsersUserIdGetQueryKey(userId) })
+        toast.success('Пользователь сохранён')
+        router.push(`/users/${userId}`)
+        return
       } else {
         const v = values as CreateUserFormValues
         const createData: UserCreate = {
@@ -94,10 +103,12 @@ export function UserForm({ defaultValues, userId }: UserFormProps) {
           role: v.role as UserRole,
         }
         await createMutation.mutateAsync({ data: createData })
+        toast.success('Пользователь создан')
       }
       router.push('/users')
     } catch {
       setError('Не удалось сохранить пользователя')
+      toast.error('Ошибка сохранения пользователя')
     }
   }
 
@@ -174,10 +185,14 @@ export function UserForm({ defaultValues, userId }: UserFormProps) {
             render={({ field }) => (
               <FormItem>
                 <FormLabel className="text-[#fafafa]">Роль</FormLabel>
-                <Select onValueChange={field.onChange} defaultValue={field.value as string}>
+                <Select value={field.value as string} onValueChange={field.onChange}>
                   <FormControl>
                     <SelectTrigger className="border-[#27272a] bg-[#18181b] text-[#fafafa]">
-                      <SelectValue placeholder="Выберите роль" />
+                      <span className={`flex-1 text-left text-sm ${!field.value ? 'text-[#71717a]' : ''}`}>
+                        {field.value
+                          ? ROLE_LABELS[field.value as keyof typeof ROLE_LABELS] ?? field.value
+                          : 'Выберите роль'}
+                      </span>
                     </SelectTrigger>
                   </FormControl>
                   <SelectContent className="border-[#27272a] bg-[#18181b]">
@@ -185,7 +200,7 @@ export function UserForm({ defaultValues, userId }: UserFormProps) {
                       <SelectItem
                         key={value}
                         value={value}
-                        className="text-[#fafafa] focus:bg-[#27272a]"
+                        className="text-[#fafafa] focus:bg-[#27272a] focus:text-[#fafafa]"
                       >
                         {label}
                       </SelectItem>
@@ -239,6 +254,38 @@ export function UserForm({ defaultValues, userId }: UserFormProps) {
               </FormItem>
             )}
           />
+
+          {/* is_active — only when editing */}
+          {isEditing && (
+            <FormField
+              control={form.control}
+              name="is_active"
+              render={({ field }) => (
+                <FormItem className="flex items-center gap-3 rounded-lg border border-[#27272a] bg-[#18181b] px-4 py-3 sm:col-span-2">
+                  <FormControl>
+                    <button
+                      type="button"
+                      role="switch"
+                      aria-checked={!!field.value}
+                      onClick={() => field.onChange(!field.value)}
+                      className={`relative inline-flex h-5 w-9 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#7c3aed] ${
+                        field.value ? 'bg-[#7c3aed]' : 'bg-[#3f3f46]'
+                      }`}
+                    >
+                      <span
+                        className={`pointer-events-none inline-block h-4 w-4 rounded-full bg-white shadow-lg transition-transform ${
+                          field.value ? 'translate-x-4' : 'translate-x-0'
+                        }`}
+                      />
+                    </button>
+                  </FormControl>
+                  <FormLabel className="cursor-pointer text-[#fafafa] font-normal">
+                    Активный пользователь
+                  </FormLabel>
+                </FormItem>
+              )}
+            />
+          )}
         </div>
 
         <div className="flex gap-3 pt-2">

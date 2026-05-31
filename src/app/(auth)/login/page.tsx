@@ -7,6 +7,7 @@ import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import axios from 'axios'
 import { useAuthStore } from '@/store/auth'
+import { getMeV1UsersMeGet } from '@/api/generated/users/users'
 import { loginSchema, type LoginFormValues } from '@/schemas/auth'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -37,7 +38,10 @@ export default function LoginPage() {
         values,
         { withCredentials: true }
       )
-      setAuth(data.data.access_token, data.data.user)
+      const token: string = data.data.access_token
+      useAuthStore.getState().setAccessToken(token)
+      const meRes = await getMeV1UsersMeGet()
+      setAuth(token, (meRes as any).data.data)
       router.push('/incidents')
     } catch {
       setError('Неверный email или пароль')

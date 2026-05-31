@@ -1,6 +1,7 @@
 'use client'
 
 import { use, useState } from 'react'
+import { useSearchParams } from 'next/navigation'
 import { PageContainer } from '@/components/layout/PageContainer'
 import { ThreatIndicator } from '@/components/incidents/ThreatIndicator'
 import { VulnerabilityForm } from '@/components/vulnerabilities/VulnerabilityForm'
@@ -41,12 +42,12 @@ export default function VulnerabilityDetailPage({
 }) {
   const { id } = use(params)
   const { canEdit } = useRole()
-  const [editing, setEditing] = useState(false)
+  const searchParams = useSearchParams()
+  const [editing, setEditing] = useState(searchParams.get('mode') === 'edit')
 
   const { data: vulnData, isLoading } = useGetVulnerabilityV1VulnerabilitiesVulnIdGet(id)
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const vulnerability = (vulnData as any)?.data
+  const vulnerability = (vulnData as any)?.data?.data
 
   if (isLoading) {
     return (

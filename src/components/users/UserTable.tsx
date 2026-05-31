@@ -2,6 +2,7 @@
 
 import Link from 'next/link'
 import { ColumnDef } from '@tanstack/react-table'
+import { Eye, Pencil, Trash2 } from 'lucide-react'
 import { DataTable } from '@/components/shared/DataTable'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
@@ -20,6 +21,7 @@ export interface UserRow {
 interface UserTableProps {
   data: UserRow[]
   isLoading?: boolean
+  onEdit?: (id: string) => void
   onDelete?: (id: string) => void
 }
 
@@ -30,7 +32,7 @@ const roleBadgeClass: Record<string, string> = {
   guard: 'bg-[#71717a]/20 text-[#a1a1aa]',
 }
 
-export function UserTable({ data, isLoading, onDelete }: UserTableProps) {
+export function UserTable({ data, isLoading, onEdit, onDelete }: UserTableProps) {
   const columns: ColumnDef<UserRow>[] = [
     {
       accessorKey: 'first_name',
@@ -83,22 +85,36 @@ export function UserTable({ data, isLoading, onDelete }: UserTableProps) {
     },
     {
       id: 'actions',
+      enableSorting: false,
       cell: ({ row }) => (
-        <div className="flex gap-2">
+        <div className="flex items-center gap-1">
           <Link
             href={`/users/${row.original.id}`}
-            className="inline-flex items-center rounded px-2 py-1 text-xs font-medium text-[#a78bfa] transition-colors hover:bg-[#27272a]"
+            title="Открыть"
+            className="inline-flex size-7 items-center justify-center rounded-md border border-[#27272a] text-[#a78bfa] transition-colors hover:bg-[#27272a] hover:text-[#c4b5fd]"
           >
-            Открыть
+            <Eye className="size-3.5" />
           </Link>
+          {onEdit && (
+            <Button
+              variant="ghost"
+              size="icon-sm"
+              title="Редактировать"
+              className="border border-[#27272a] text-[#a78bfa] hover:bg-[#27272a] hover:text-[#c4b5fd]"
+              onClick={() => onEdit(row.original.id)}
+            >
+              <Pencil className="size-3.5" />
+            </Button>
+          )}
           {onDelete && (
             <Button
               variant="ghost"
-              size="sm"
-              className="text-red-400 hover:text-red-300"
+              size="icon-sm"
+              title="Удалить"
+              className="border border-[#27272a] text-red-400 hover:bg-[#27272a] hover:text-red-300"
               onClick={() => onDelete(row.original.id)}
             >
-              Удалить
+              <Trash2 className="size-3.5" />
             </Button>
           )}
         </div>

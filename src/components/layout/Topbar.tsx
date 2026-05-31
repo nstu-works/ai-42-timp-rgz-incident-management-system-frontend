@@ -1,6 +1,7 @@
 // src/components/layout/Topbar.tsx
 'use client'
 
+import Link from 'next/link'
 import { LogOut, User } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { useAuthStore } from '@/store/auth'
@@ -21,7 +22,10 @@ export function Topbar() {
     <header className="flex h-14 items-center justify-between border-b border-[#27272a] bg-[#18181b] px-6">
       <div />
       <div className="flex items-center gap-3">
-        <div className="flex items-center gap-2 text-sm">
+        <Link
+          href={user?.id ? `/users/${user.id}` : '#'}
+          className="flex items-center gap-2 text-sm transition-opacity hover:opacity-80"
+        >
           <User size={14} className="text-[#71717a]" />
           <span className="text-[#fafafa]">
             {user?.first_name} {user?.last_name}
@@ -29,7 +33,7 @@ export function Topbar() {
           <span className="rounded border border-[#27272a] px-1.5 py-0.5 text-xs text-[#a78bfa]">
             {user?.role ? ROLE_LABELS[user.role] : ''}
           </span>
-        </div>
+        </Link>
         <Button
           data-testid="logout"
           variant="ghost"

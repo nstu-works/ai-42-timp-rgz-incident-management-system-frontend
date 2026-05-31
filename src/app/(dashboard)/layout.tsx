@@ -5,6 +5,7 @@ import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import axios from 'axios'
 import { useAuthStore } from '@/store/auth'
+import { getMeV1UsersMeGet } from '@/api/generated/users/users'
 import { Sidebar } from '@/components/layout/Sidebar'
 import { Topbar } from '@/components/layout/Topbar'
 
@@ -18,23 +19,28 @@ export default function DashboardLayout({
   const [ready, setReady] = useState(false)
 
   useEffect(() => {
-    if (accessToken) {
-      setReady(true)
-      return
-    }
-    axios
-      .post(
-        'http://localhost:8000/api/v1/auth/refresh',
-        {},
-        { withCredentials: true }
-      )
-      .then(({ data }) => {
-        setAuth(data.data.access_token, data.data.user)
+    async function init() {
+      try {
+        let token = accessToken
+
+        if (!token) {
+          const { data } = await axios.post(
+            'http://localhost:8000/api/v1/auth/refresh',
+            {},
+            { withCredentials: true }
+          )
+          token = data.data.access_token
+          useAuthStore.getState().setAccessToken(token!)
+        }
+
+        const meRes = await getMeV1UsersMeGet()
+        setAuth(token!, (meRes as any).data.data)
         setReady(true)
-      })
-      .catch(() => {
+      } catch {
         router.push('/login')
-      })
+      }
+    }
+    init()
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 

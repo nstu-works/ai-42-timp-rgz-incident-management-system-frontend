@@ -1,11 +1,15 @@
 'use client'
 
+import { useState } from 'react'
 import {
   ColumnDef,
+  SortingState,
   flexRender,
   getCoreRowModel,
+  getSortedRowModel,
   useReactTable,
 } from '@tanstack/react-table'
+import { ArrowUpDown, ChevronUp, ChevronDown } from 'lucide-react'
 import {
   Table,
   TableBody,
@@ -28,10 +32,15 @@ export function DataTable<TData>({
   isLoading,
   emptyMessage = 'Нет данных',
 }: DataTableProps<TData>) {
+  const [sorting, setSorting] = useState<SortingState>([])
+
   const table = useReactTable({
     data,
     columns,
     getCoreRowModel: getCoreRowModel(),
+    getSortedRowModel: getSortedRowModel(),
+    onSortingChange: setSorting,
+    state: { sorting },
   })
 
   return (
@@ -40,13 +49,35 @@ export function DataTable<TData>({
         <TableHeader>
           {table.getHeaderGroups().map((hg) => (
             <TableRow key={hg.id} className="border-[#27272a] hover:bg-transparent">
-              {hg.headers.map((h) => (
-                <TableHead key={h.id} className="text-[#71717a]">
-                  {h.isPlaceholder
-                    ? null
-                    : flexRender(h.column.columnDef.header, h.getContext())}
-                </TableHead>
-              ))}
+              {hg.headers.map((h) => {
+                const canSort = h.column.getCanSort()
+                const sorted = h.column.getIsSorted()
+                return (
+                  <TableHead
+                    key={h.id}
+                    className="text-[#71717a]"
+                  >
+                    {h.isPlaceholder ? null : canSort ? (
+                      <button
+                        type="button"
+                        onClick={h.column.getToggleSortingHandler()}
+                        className="flex items-center gap-1 hover:text-[#a1a1aa] transition-colors"
+                      >
+                        {flexRender(h.column.columnDef.header, h.getContext())}
+                        {sorted === 'asc' ? (
+                          <ChevronUp className="size-3.5 text-[#a78bfa]" />
+                        ) : sorted === 'desc' ? (
+                          <ChevronDown className="size-3.5 text-[#a78bfa]" />
+                        ) : (
+                          <ArrowUpDown className="size-3.5 opacity-40" />
+                        )}
+                      </button>
+                    ) : (
+                      flexRender(h.column.columnDef.header, h.getContext())
+                    )}
+                  </TableHead>
+                )
+              })}
             </TableRow>
           ))}
         </TableHeader>

@@ -10,7 +10,6 @@ import {
   MapPin,
   Tag,
   Users,
-  BarChart2,
   FileText,
 } from 'lucide-react'
 import type { UserRole } from '@/types'
@@ -52,12 +51,6 @@ const NAV_ITEMS: {
     roles: ['operator', 'admin'],
   },
   {
-    href: '/stats',
-    label: 'Статистика',
-    icon: BarChart2,
-    roles: ['analyst', 'admin'],
-  },
-  {
     href: '/audit',
     label: 'Аудит',
     icon: FileText,
@@ -76,7 +69,9 @@ export function Sidebar() {
   return (
     <aside className="flex w-60 flex-shrink-0 flex-col border-r border-[#27272a] bg-[#18181b]">
       <div className="flex h-14 items-center border-b border-[#27272a] px-4">
-        <span className="text-lg font-semibold text-[#a78bfa]">IMS</span>
+        <Link href="/" className="text-lg font-semibold text-[#a78bfa] hover:text-[#c4b5fd] transition-colors">
+          IMS
+        </Link>
       </div>
       <nav className="flex-1 space-y-1 p-2">
         {visible.map((item) => {

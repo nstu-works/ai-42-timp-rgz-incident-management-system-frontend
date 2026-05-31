@@ -2,11 +2,12 @@
 
 import { useState } from 'react'
 import { ColumnDef } from '@tanstack/react-table'
+import { Pencil, Trash2 } from 'lucide-react'
 import { PageContainer } from '@/components/layout/PageContainer'
 import { DataTable } from '@/components/shared/DataTable'
+import { Button } from '@/components/ui/button'
 import { ConfirmDialog } from '@/components/shared/ConfirmDialog'
 import { CategoryModal } from '@/components/categories/CategoryModal'
-import { Button } from '@/components/ui/button'
 import { useRole } from '@/hooks/useRole'
 import {
   useListCategoriesV1CategoriesGet,
@@ -31,8 +32,7 @@ export default function CategoriesPage() {
   const { data, isLoading, refetch } = useListCategoriesV1CategoriesGet()
   const deleteMutation = useDeleteCategoryV1CategoriesCatIdDelete()
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const categories: CategoryRow[] = (data as any)?.data ?? []
+  const categories: CategoryRow[] = (data as any)?.data?.data ?? []
 
   function handleDelete() {
     if (!deleteId) return
@@ -75,24 +75,26 @@ export default function CategoriesPage() {
     {
       id: 'actions',
       cell: ({ row }) => (
-        <div className="flex gap-2">
+        <div className="flex items-center gap-1">
           {isAdmin && (
             <>
               <Button
                 variant="ghost"
-                size="sm"
-                className="text-[#a78bfa] hover:text-[#c4b5fd]"
+                size="icon-sm"
+                title="Редактировать"
+                className="border border-[#27272a] text-[#a78bfa] hover:bg-[#27272a] hover:text-[#c4b5fd]"
                 onClick={() => openEdit(row.original)}
               >
-                Изменить
+                <Pencil className="size-3.5" />
               </Button>
               <Button
                 variant="ghost"
-                size="sm"
-                className="text-red-400 hover:text-red-300"
+                size="icon-sm"
+                title="Удалить"
+                className="border border-[#27272a] text-red-400 hover:bg-[#27272a] hover:text-red-300"
                 onClick={() => setDeleteId(row.original.id)}
               >
-                Удалить
+                <Trash2 className="size-3.5" />
               </Button>
             </>
           )}
@@ -106,12 +108,12 @@ export default function CategoriesPage() {
       title="Категории"
       action={
         isAdmin ? (
-          <Button
+          <button
             onClick={openAdd}
-            className="bg-[#7c3aed] text-white hover:bg-[#6d28d9]"
+            className="inline-flex items-center rounded-lg bg-[#7c3aed] px-3 py-1.5 text-sm font-medium text-white transition-colors hover:bg-[#6d28d9]"
           >
             Добавить
-          </Button>
+          </button>
         ) : null
       }
     >

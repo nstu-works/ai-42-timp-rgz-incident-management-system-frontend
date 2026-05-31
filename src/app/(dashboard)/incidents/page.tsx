@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import Link from 'next/link'
+import { useRouter } from 'next/navigation'
 import { PageContainer } from '@/components/layout/PageContainer'
 import { IncidentTable } from '@/components/incidents/IncidentTable'
 import { ConfirmDialog } from '@/components/shared/ConfirmDialog'
@@ -12,14 +13,14 @@ import {
 } from '@/api/generated/incidents/incidents'
 
 export default function IncidentsPage() {
-  const { isGuard, canDelete } = useRole()
+  const { isGuard, canEdit, canDelete } = useRole()
+  const router = useRouter()
   const [deleteId, setDeleteId] = useState<string | null>(null)
 
   const { data, isLoading } = useListIncidentsV1IncidentsGet()
   const deleteMutation = useDeleteIncidentV1IncidentsIncidentIdDelete()
 
-  // API returns BaseResponse<List[Incident]> — unwrap .data
-  const incidents = (data as any)?.data ?? []
+  const incidents = (data as any)?.data?.data ?? []
 
   function handleDelete() {
     if (!deleteId) return
@@ -37,13 +38,14 @@ export default function IncidentsPage() {
           href="/incidents/new"
           className="inline-flex items-center rounded-lg bg-[#7c3aed] px-3 py-1.5 text-sm font-medium text-white transition-colors hover:bg-[#6d28d9]"
         >
-          {isGuard ? 'Сообщить об инциденте' : 'Создать инцидент'}
+          Добавить
         </Link>
       }
     >
       <IncidentTable
         data={incidents}
         isLoading={isLoading}
+        onEdit={canEdit ? (id) => router.push(`/incidents/${id}?mode=edit`) : undefined}
         onDelete={canDelete ? setDeleteId : undefined}
       />
       <ConfirmDialog

@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
+import { toast } from 'sonner'
 import { locationTypeSchema, type LocationTypeFormValues } from '@/schemas/location'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -72,10 +73,12 @@ export function LocationTypeModal({
         const createData: LocationTypeCreate = { name: values.name }
         await createMutation.mutateAsync({ data: createData })
       }
+      toast.success(editing ? 'Тип локации сохранён' : 'Тип локации создан')
       onSuccess()
       onOpenChange(false)
     } catch {
       setError('Не удалось сохранить тип локации')
+      toast.error('Ошибка сохранения типа локации')
     }
   }
 

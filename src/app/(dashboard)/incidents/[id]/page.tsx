@@ -1,6 +1,7 @@
 'use client'
 
 import { use, useState } from 'react'
+import { useSearchParams } from 'next/navigation'
 import { PageContainer } from '@/components/layout/PageContainer'
 import { StatusBadge } from '@/components/incidents/StatusBadge'
 import { ThreatIndicator } from '@/components/incidents/ThreatIndicator'
@@ -9,6 +10,7 @@ import { ResponseList } from '@/components/incidents/ResponseList'
 import { IncidentForm } from '@/components/incidents/IncidentForm'
 import { Button } from '@/components/ui/button'
 import { useRole } from '@/hooks/useRole'
+import { ROLE_LABELS } from '@/schemas/user'
 import {
   useGetIncidentV1IncidentsIncidentIdGet,
   useListPhotosV1IncidentsIncidentIdPhotosGet,
@@ -23,19 +25,17 @@ export default function IncidentDetailPage({
   params: Promise<{ id: string }>
 }) {
   const { id } = use(params)
-  const { canEdit } = useRole()
-  const [editing, setEditing] = useState(false)
+  const { canEdit, canViewVulnerabilities } = useRole()
+  const searchParams = useSearchParams()
+  const [editing, setEditing] = useState(searchParams.get('mode') === 'edit')
 
   const { data: incidentData, isLoading } = useGetIncidentV1IncidentsIncidentIdGet(id)
   const { data: photosData } = useListPhotosV1IncidentsIncidentIdPhotosGet(id)
   const { data: responsesData } = useListResponsesV1IncidentsIncidentIdResponsesGet(id)
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const incident = (incidentData as any)?.data
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const photos = (photosData as any)?.data ?? []
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const responses = (responsesData as any)?.data ?? []
+  const incident = (incidentData as any)?.data?.data
+  const photos = (photosData as any)?.data?.data ?? []
+  const responses = (responsesData as any)?.data?.data ?? []
 
   if (isLoading) {
     return (
@@ -104,6 +104,41 @@ export default function IncidentDetailPage({
                 {format(new Date(incident.created_at), 'dd MMM yyyy', { locale: ru })}
               </span>
             </div>
+            <div>
+              <span className="text-[#71717a]">Локация: </span>
+              <span className="text-[#fafafa]">{incident.location?.name ?? '—'}</span>
+            </div>
+            <div>
+              <span className="text-[#71717a]">Категория: </span>
+              <span className="text-[#fafafa]">{incident.category?.name ?? '—'}</span>
+            </div>
+            <div>
+              <span className="text-[#71717a]">Репортировал: </span>
+              <span className="text-[#fafafa]">
+                {incident.reporter
+                  ? [incident.reporter.first_name, incident.reporter.last_name].filter(Boolean).join(' ')
+                  : '—'}
+                {incident.reporter?.role && (
+                  <span className="ml-1 text-[#71717a]">
+                    ({ROLE_LABELS[incident.reporter.role as keyof typeof ROLE_LABELS] ?? incident.reporter.role})
+                  </span>
+                )}
+              </span>
+            </div>
+            <div>
+              <span className="text-[#71717a]">Назначен: </span>
+              <span className="text-[#fafafa]">
+                {incident.assignee
+                  ? [incident.assignee.first_name, incident.assignee.last_name].filter(Boolean).join(' ')
+                  : 'Не назначен'}
+              </span>
+            </div>
+            {canViewVulnerabilities && (
+              <div className="col-span-2">
+                <span className="text-[#71717a]">Уязвимость: </span>
+                <span className="text-[#fafafa]">{incident.vulnerability?.name ?? 'Не указана'}</span>
+              </div>
+            )}
           </div>
         </div>
 

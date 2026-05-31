@@ -4,6 +4,8 @@ import { useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useRouter } from 'next/navigation'
+import { useQueryClient } from '@tanstack/react-query'
+import { toast } from 'sonner'
 import { locationSchema, type LocationFormValues } from '@/schemas/location'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -20,12 +22,13 @@ import {
   SelectContent,
   SelectItem,
   SelectTrigger,
-  SelectValue,
 } from '@/components/ui/select'
 import { ErrorAlert } from '@/components/shared/ErrorAlert'
 import {
   useCreateLocationV1LocationsPost,
   useUpdateLocationV1LocationsLocIdPatch,
+  getListLocationsV1LocationsGetQueryKey,
+  getGetLocationV1LocationsLocIdGetQueryKey,
 } from '@/api/generated/locations/locations'
 import { useListLocationTypesV1LocationTypesGet } from '@/api/generated/location-types/location-types'
 import type { LocationCreate, LocationUpdate } from '@/api/generated/iMSIncidentManagementSystem.schemas'
@@ -37,14 +40,14 @@ interface LocationFormProps {
 
 export function LocationForm({ defaultValues, locationId }: LocationFormProps) {
   const router = useRouter()
+  const queryClient = useQueryClient()
   const [error, setError] = useState<string | null>(null)
 
   const createMutation = useCreateLocationV1LocationsPost()
   const updateMutation = useUpdateLocationV1LocationsLocIdPatch()
 
   const { data: locationTypesData } = useListLocationTypesV1LocationTypesGet()
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const locationTypes = (locationTypesData as any)?.data ?? []
+  const locationTypes = (locationTypesData as any)?.data?.data ?? []
 
   const form = useForm<LocationFormValues>({
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -67,6 +70,11 @@ export function LocationForm({ defaultValues, locationId }: LocationFormProps) {
           address: values.address ?? null,
         }
         await updateMutation.mutateAsync({ locId: locationId, data: updateData })
+        await queryClient.invalidateQueries({ queryKey: getListLocationsV1LocationsGetQueryKey() })
+        await queryClient.invalidateQueries({ queryKey: getGetLocationV1LocationsLocIdGetQueryKey(locationId) })
+        toast.success('Локация сохранена')
+        router.push(`/locations/${locationId}`)
+        return
       } else {
         const createData: LocationCreate = {
           name: values.name,
@@ -74,10 +82,12 @@ export function LocationForm({ defaultValues, locationId }: LocationFormProps) {
           address: values.address ?? null,
         }
         await createMutation.mutateAsync({ data: createData })
+        toast.success('Локация создана')
       }
       router.push('/locations')
     } catch {
       setError('Не удалось сохранить локацию')
+      toast.error('Ошибка сохранения локации')
     }
   }
 
@@ -111,31 +121,37 @@ export function LocationForm({ defaultValues, locationId }: LocationFormProps) {
         <FormField
           control={form.control}
           name="location_type_id"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel className="text-[#fafafa]">Тип локации</FormLabel>
-              <Select onValueChange={field.onChange} defaultValue={field.value}>
-                <FormControl>
-                  <SelectTrigger className="border-[#27272a] bg-[#18181b] text-[#fafafa]">
-                    <SelectValue placeholder="Выберите тип" />
-                  </SelectTrigger>
-                </FormControl>
-                <SelectContent className="border-[#27272a] bg-[#18181b]">
-                  {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
-                  {locationTypes.map((lt: any) => (
-                    <SelectItem
-                      key={lt.id}
-                      value={lt.id}
-                      className="text-[#fafafa] focus:bg-[#27272a]"
-                    >
-                      {lt.name}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-              <FormMessage />
-            </FormItem>
-          )}
+          render={({ field }) => {
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            const selected = locationTypes.find((lt: any) => lt.id === field.value)
+            return (
+              <FormItem>
+                <FormLabel className="text-[#fafafa]">Тип локации</FormLabel>
+                <Select value={field.value ?? ''} onValueChange={field.onChange}>
+                  <FormControl>
+                    <SelectTrigger className="border-[#27272a] bg-[#18181b] text-[#fafafa]">
+                      <span className={`flex-1 text-left text-sm ${!selected ? 'text-[#71717a]' : ''}`}>
+                        {selected ? selected.name : 'Выберите тип'}
+                      </span>
+                    </SelectTrigger>
+                  </FormControl>
+                  <SelectContent className="border-[#27272a] bg-[#18181b]">
+                    {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
+                    {locationTypes.map((lt: any) => (
+                      <SelectItem
+                        key={lt.id}
+                        value={lt.id}
+                        className="text-[#fafafa] focus:bg-[#27272a]"
+                      >
+                        {lt.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                <FormMessage />
+              </FormItem>
+            )
+          }}
         />
 
         {/* Address */}

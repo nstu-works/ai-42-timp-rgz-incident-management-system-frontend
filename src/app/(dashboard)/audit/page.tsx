@@ -24,8 +24,8 @@ export default function AuditPage() {
 
   const isLoading = activeFilter ? filteredLogsQuery.isLoading : allLogsQuery.isLoading
   const rawData = activeFilter
-    ? (filteredLogsQuery.data as any)?.data
-    : (allLogsQuery.data as any)?.data
+    ? (filteredLogsQuery.data as any)?.data?.data
+    : (allLogsQuery.data as any)?.data?.data
 
   const logs: AuditLogRow[] = (rawData ?? []).map((entry: any) => ({
     id: entry.id,

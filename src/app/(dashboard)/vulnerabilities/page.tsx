@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import Link from 'next/link'
+import { useRouter } from 'next/navigation'
 import { PageContainer } from '@/components/layout/PageContainer'
 import { VulnerabilityTable } from '@/components/vulnerabilities/VulnerabilityTable'
 import { ConfirmDialog } from '@/components/shared/ConfirmDialog'
@@ -13,14 +14,14 @@ import {
 } from '@/api/generated/vulnerabilities/vulnerabilities'
 
 export default function VulnerabilitiesPage() {
-  const { canViewVulnerabilities, canDelete } = useRole()
+  const { canViewVulnerabilities, canEdit, canDelete } = useRole()
+  const router = useRouter()
   const [deleteId, setDeleteId] = useState<string | null>(null)
 
   const { data, isLoading } = useListVulnerabilitiesV1VulnerabilitiesGet()
   const deleteMutation = useDeleteVulnerabilityV1VulnerabilitiesVulnIdDelete()
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const vulnerabilities = (data as any)?.data ?? []
+  const vulnerabilities = (data as any)?.data?.data ?? []
 
   if (!canViewVulnerabilities) {
     return <EmptyState message="Недостаточно прав для просмотра уязвимостей" />
@@ -42,13 +43,14 @@ export default function VulnerabilitiesPage() {
           href="/vulnerabilities/new"
           className="inline-flex items-center rounded-lg bg-[#7c3aed] px-3 py-1.5 text-sm font-medium text-white transition-colors hover:bg-[#6d28d9]"
         >
-          Добавить уязвимость
+          Добавить
         </Link>
       }
     >
       <VulnerabilityTable
         data={vulnerabilities}
         isLoading={isLoading}
+        onEdit={canEdit ? (id) => router.push(`/vulnerabilities/${id}?mode=edit`) : undefined}
         onDelete={canDelete ? setDeleteId : undefined}
       />
       <ConfirmDialog

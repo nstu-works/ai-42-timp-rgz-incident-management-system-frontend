@@ -2,7 +2,9 @@
 
 import { useState } from 'react'
 import Link from 'next/link'
+import { useRouter } from 'next/navigation'
 import { ColumnDef } from '@tanstack/react-table'
+import { Pencil, Trash2 } from 'lucide-react'
 import { PageContainer } from '@/components/layout/PageContainer'
 import { LocationTable } from '@/components/locations/LocationTable'
 import { LocationTypeModal } from '@/components/locations/LocationTypeModal'
@@ -27,6 +29,9 @@ interface LocationTypeRow {
 
 export default function LocationsPage() {
   const { isAdmin } = useRole()
+  const router = useRouter()
+
+  const [activeTab, setActiveTab] = useState<'locations' | 'types'>('locations')
 
   // Locations state
   const [deleteLocId, setDeleteLocId] = useState<string | null>(null)
@@ -44,10 +49,8 @@ export default function LocationsPage() {
   const deleteLocMutation = useDeleteLocationV1LocationsLocIdDelete()
   const deleteTypeMutation = useDeleteLocationTypeV1LocationTypesLtIdDelete()
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const locations = (locsData as any)?.data ?? []
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const locationTypes = (typesData as any)?.data ?? []
+  const locations = (locsData as any)?.data?.data ?? []
+  const locationTypes = (typesData as any)?.data?.data ?? []
 
   function handleDeleteLoc() {
     if (!deleteLocId) return
@@ -94,24 +97,26 @@ export default function LocationsPage() {
     {
       id: 'actions',
       cell: ({ row }) => (
-        <div className="flex gap-2">
+        <div className="flex items-center gap-1">
           {isAdmin && (
             <>
               <Button
                 variant="ghost"
-                size="sm"
-                className="text-[#a78bfa] hover:text-[#c4b5fd]"
+                size="icon-sm"
+                title="Редактировать"
+                className="border border-[#27272a] text-[#a78bfa] hover:bg-[#27272a] hover:text-[#c4b5fd]"
                 onClick={() => openEditType(row.original)}
               >
-                Изменить
+                <Pencil className="size-3.5" />
               </Button>
               <Button
                 variant="ghost"
-                size="sm"
-                className="text-red-400 hover:text-red-300"
+                size="icon-sm"
+                title="Удалить"
+                className="border border-[#27272a] text-red-400 hover:bg-[#27272a] hover:text-red-300"
                 onClick={() => setDeleteTypeId(row.original.id)}
               >
-                Удалить
+                <Trash2 className="size-3.5" />
               </Button>
             </>
           )}
@@ -120,21 +125,30 @@ export default function LocationsPage() {
     },
   ]
 
+  const action = isAdmin ? (
+    activeTab === 'locations' ? (
+      <Link
+        href="/locations/new"
+        className="inline-flex items-center rounded-lg bg-[#7c3aed] px-3 py-1.5 text-sm font-medium text-white transition-colors hover:bg-[#6d28d9]"
+      >
+        Добавить
+      </Link>
+    ) : (
+      <button
+        onClick={openAddType}
+        className="inline-flex items-center rounded-lg bg-[#7c3aed] px-3 py-1.5 text-sm font-medium text-white transition-colors hover:bg-[#6d28d9]"
+      >
+        Добавить
+      </button>
+    )
+  ) : null
+
   return (
-    <PageContainer
-      title="Локации"
-      action={
-        isAdmin ? (
-          <Link
-            href="/locations/new"
-            className="inline-flex items-center rounded-lg bg-[#7c3aed] px-3 py-1.5 text-sm font-medium text-white transition-colors hover:bg-[#6d28d9]"
-          >
-            Добавить локацию
-          </Link>
-        ) : null
-      }
-    >
-      <Tabs defaultValue="locations">
+    <PageContainer title="Локации" action={action}>
+      <Tabs
+        defaultValue="locations"
+        onValueChange={(v) => setActiveTab(v as 'locations' | 'types')}
+      >
         <TabsList className="mb-4">
           <TabsTrigger value="locations">Локации</TabsTrigger>
           <TabsTrigger value="types">Типы локаций</TabsTrigger>
@@ -144,29 +158,18 @@ export default function LocationsPage() {
           <LocationTable
             data={locations}
             isLoading={locsLoading}
+            onEdit={isAdmin ? (id) => router.push(`/locations/${id}?mode=edit`) : undefined}
             onDelete={isAdmin ? setDeleteLocId : undefined}
           />
         </TabsContent>
 
         <TabsContent value="types">
-          <div className="space-y-4">
-            {isAdmin && (
-              <div className="flex justify-end">
-                <Button
-                  onClick={openAddType}
-                  className="bg-[#7c3aed] text-white hover:bg-[#6d28d9]"
-                >
-                  Добавить тип
-                </Button>
-              </div>
-            )}
-            <DataTable
-              columns={typeColumns}
-              data={locationTypes}
-              isLoading={typesLoading}
-              emptyMessage="Типов локаций нет"
-            />
-          </div>
+          <DataTable
+            columns={typeColumns}
+            data={locationTypes}
+            isLoading={typesLoading}
+            emptyMessage="Типов локаций нет"
+          />
         </TabsContent>
       </Tabs>
 

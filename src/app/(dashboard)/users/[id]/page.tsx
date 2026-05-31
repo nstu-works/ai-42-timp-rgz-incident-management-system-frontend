@@ -1,6 +1,7 @@
 'use client'
 
 import { use, useState } from 'react'
+import { useSearchParams } from 'next/navigation'
 import { PageContainer } from '@/components/layout/PageContainer'
 import { UserForm } from '@/components/users/UserForm'
 import { Button } from '@/components/ui/button'
@@ -16,11 +17,11 @@ export default function UserDetailPage({
 }) {
   const { id } = use(params)
   const { canViewUsers, isAdmin } = useRole()
-  const [editing, setEditing] = useState(false)
+  const searchParams = useSearchParams()
+  const [editing, setEditing] = useState(searchParams.get('mode') === 'edit')
 
   const { data: userData, isLoading } = useGetUserV1UsersUserIdGet(id)
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const user = (userData as any)?.data
+  const user = (userData as any)?.data?.data
 
   if (!canViewUsers) {
     return <EmptyState message="Недостаточно прав для просмотра пользователей" />

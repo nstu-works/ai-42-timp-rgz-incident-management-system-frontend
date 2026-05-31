@@ -4,7 +4,10 @@ import { useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useRouter } from 'next/navigation'
+import { useQueryClient } from '@tanstack/react-query'
+import { toast } from 'sonner'
 import { incidentSchema, type IncidentFormValues, STATUS_LABELS } from '@/schemas/incident'
+import { ROLE_LABELS } from '@/schemas/user'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
@@ -21,12 +24,13 @@ import {
   SelectContent,
   SelectItem,
   SelectTrigger,
-  SelectValue,
 } from '@/components/ui/select'
 import { ErrorAlert } from '@/components/shared/ErrorAlert'
 import {
   useCreateIncidentV1IncidentsPost,
   useUpdateIncidentV1IncidentsIncidentIdPatch,
+  getListIncidentsV1IncidentsGetQueryKey,
+  getGetIncidentV1IncidentsIncidentIdGetQueryKey,
 } from '@/api/generated/incidents/incidents'
 import { useListLocationsV1LocationsGet } from '@/api/generated/locations/locations'
 import { useListCategoriesV1CategoriesGet } from '@/api/generated/categories/categories'
@@ -38,6 +42,8 @@ import type {
   IncidentStatus,
 } from '@/api/generated/iMSIncidentManagementSystem.schemas'
 
+const THREAT_LABELS = ['Минимальный', 'Низкий', 'Средний', 'Высокий', 'Критический']
+
 interface IncidentFormProps {
   defaultValues?: Partial<IncidentFormValues>
   incidentId?: string
@@ -45,6 +51,7 @@ interface IncidentFormProps {
 
 export function IncidentForm({ defaultValues, incidentId }: IncidentFormProps) {
   const router = useRouter()
+  const queryClient = useQueryClient()
   const [error, setError] = useState<string | null>(null)
 
   const createMutation = useCreateIncidentV1IncidentsPost()
@@ -55,10 +62,10 @@ export function IncidentForm({ defaultValues, incidentId }: IncidentFormProps) {
   const { data: usersData } = useListUsersV1UsersGet()
   const { data: vulnsData } = useListVulnerabilitiesV1VulnerabilitiesGet()
 
-  const locations = (locationsData as any)?.data ?? []
-  const categories = (categoriesData as any)?.data ?? []
-  const users = (usersData as any)?.data ?? []
-  const vulnerabilities = (vulnsData as any)?.data ?? []
+  const locations = (locationsData as any)?.data?.data ?? []
+  const categories = (categoriesData as any)?.data?.data ?? []
+  const users = (usersData as any)?.data?.data ?? []
+  const vulnerabilities = (vulnsData as any)?.data?.data ?? []
 
   const form = useForm<IncidentFormValues>({
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -81,8 +88,6 @@ export function IncidentForm({ defaultValues, incidentId }: IncidentFormProps) {
     setError(null)
     try {
       if (incidentId) {
-        // IncidentUpdate: title, description, status, threat_level, assigned_to, vulnerability_id, resolved_at
-        // location_id and category_id are NOT in IncidentUpdate
         const updateData: IncidentUpdate = {
           title: values.title,
           description: values.description ?? null,
@@ -92,9 +97,12 @@ export function IncidentForm({ defaultValues, incidentId }: IncidentFormProps) {
           vulnerability_id: values.vulnerability_id ?? null,
         }
         await updateMutation.mutateAsync({ incidentId, data: updateData })
+        await queryClient.invalidateQueries({ queryKey: getListIncidentsV1IncidentsGetQueryKey() })
+        await queryClient.invalidateQueries({ queryKey: getGetIncidentV1IncidentsIncidentIdGetQueryKey(incidentId) })
+        toast.success('Инцидент сохранён')
+        router.push(`/incidents/${incidentId}`)
+        return
       } else {
-        // IncidentCreate: title, description, threat_level, location_id, category_id, vulnerability_id, occurred_at
-        // status and assigned_to are NOT in IncidentCreate
         const createData: IncidentCreate = {
           title: values.title,
           description: values.description ?? null,
@@ -105,10 +113,12 @@ export function IncidentForm({ defaultValues, incidentId }: IncidentFormProps) {
           occurred_at: values.occurred_at,
         }
         await createMutation.mutateAsync({ data: createData })
+        toast.success('Инцидент создан')
       }
       router.push('/incidents')
     } catch {
       setError('Не удалось сохранить инцидент')
+      toast.error('Ошибка сохранения инцидента')
     }
   }
 
@@ -160,7 +170,7 @@ export function IncidentForm({ defaultValues, incidentId }: IncidentFormProps) {
         />
 
         <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
-          {/* Status — only relevant for edit */}
+          {/* Status — only for edit */}
           {incidentId && (
             <FormField
               control={form.control}
@@ -168,10 +178,14 @@ export function IncidentForm({ defaultValues, incidentId }: IncidentFormProps) {
               render={({ field }) => (
                 <FormItem>
                   <FormLabel className="text-[#fafafa]">Статус</FormLabel>
-                  <Select onValueChange={field.onChange} defaultValue={field.value}>
+                  <Select value={field.value ?? ''} onValueChange={field.onChange}>
                     <FormControl>
                       <SelectTrigger className="border-[#27272a] bg-[#18181b] text-[#fafafa]">
-                        <SelectValue placeholder="Выберите статус" />
+                        <span className="flex-1 text-left text-sm">
+                          {field.value
+                            ? STATUS_LABELS[field.value as keyof typeof STATUS_LABELS] ?? field.value
+                            : <span className="text-[#71717a]">Выберите статус</span>}
+                        </span>
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent className="border-[#27272a] bg-[#18181b]">
@@ -200,12 +214,16 @@ export function IncidentForm({ defaultValues, incidentId }: IncidentFormProps) {
               <FormItem>
                 <FormLabel className="text-[#fafafa]">Уровень угрозы</FormLabel>
                 <Select
+                  value={String(field.value)}
                   onValueChange={(v) => field.onChange(Number(v))}
-                  defaultValue={String(field.value)}
                 >
                   <FormControl>
                     <SelectTrigger className="border-[#27272a] bg-[#18181b] text-[#fafafa]">
-                      <SelectValue placeholder="Выберите уровень" />
+                      <span className="flex-1 text-left text-sm">
+                        {field.value
+                          ? `${field.value} — ${THREAT_LABELS[Number(field.value) - 1]}`
+                          : <span className="text-[#71717a]">Выберите уровень</span>}
+                      </span>
                     </SelectTrigger>
                   </FormControl>
                   <SelectContent className="border-[#27272a] bg-[#18181b]">
@@ -215,7 +233,7 @@ export function IncidentForm({ defaultValues, incidentId }: IncidentFormProps) {
                         value={String(level)}
                         className="text-[#fafafa] focus:bg-[#27272a]"
                       >
-                        {level} — {['Минимальный', 'Низкий', 'Средний', 'Высокий', 'Критический'][level - 1]}
+                        {level} — {THREAT_LABELS[level - 1]}
                       </SelectItem>
                     ))}
                   </SelectContent>
@@ -230,30 +248,35 @@ export function IncidentForm({ defaultValues, incidentId }: IncidentFormProps) {
             <FormField
               control={form.control}
               name="location_id"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel className="text-[#fafafa]">Локация</FormLabel>
-                  <Select onValueChange={field.onChange} defaultValue={field.value}>
-                    <FormControl>
-                      <SelectTrigger className="border-[#27272a] bg-[#18181b] text-[#fafafa]">
-                        <SelectValue placeholder="Выберите локацию" />
-                      </SelectTrigger>
-                    </FormControl>
-                    <SelectContent className="border-[#27272a] bg-[#18181b]">
-                      {locations.map((loc: any) => (
-                        <SelectItem
-                          key={loc.id}
-                          value={loc.id}
-                          className="text-[#fafafa] focus:bg-[#27272a]"
-                        >
-                          {loc.name}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                  <FormMessage />
-                </FormItem>
-              )}
+              render={({ field }) => {
+                const selected = locations.find((l: any) => l.id === field.value)
+                return (
+                  <FormItem>
+                    <FormLabel className="text-[#fafafa]">Локация</FormLabel>
+                    <Select value={field.value ?? ''} onValueChange={field.onChange}>
+                      <FormControl>
+                        <SelectTrigger className="border-[#27272a] bg-[#18181b] text-[#fafafa]">
+                          <span className={`flex-1 text-left text-sm ${!selected ? 'text-[#71717a]' : ''}`}>
+                            {selected ? selected.name : 'Выберите локацию'}
+                          </span>
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent className="border-[#27272a] bg-[#18181b]">
+                        {locations.map((loc: any) => (
+                          <SelectItem
+                            key={loc.id}
+                            value={loc.id}
+                            className="text-[#fafafa] focus:bg-[#27272a]"
+                          >
+                            {loc.name}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    <FormMessage />
+                  </FormItem>
+                )
+              }}
             />
           )}
 
@@ -262,30 +285,35 @@ export function IncidentForm({ defaultValues, incidentId }: IncidentFormProps) {
             <FormField
               control={form.control}
               name="category_id"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel className="text-[#fafafa]">Категория</FormLabel>
-                  <Select onValueChange={field.onChange} defaultValue={field.value}>
-                    <FormControl>
-                      <SelectTrigger className="border-[#27272a] bg-[#18181b] text-[#fafafa]">
-                        <SelectValue placeholder="Выберите категорию" />
-                      </SelectTrigger>
-                    </FormControl>
-                    <SelectContent className="border-[#27272a] bg-[#18181b]">
-                      {categories.map((cat: any) => (
-                        <SelectItem
-                          key={cat.id}
-                          value={cat.id}
-                          className="text-[#fafafa] focus:bg-[#27272a]"
-                        >
-                          {cat.name}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                  <FormMessage />
-                </FormItem>
-              )}
+              render={({ field }) => {
+                const selected = categories.find((c: any) => c.id === field.value)
+                return (
+                  <FormItem>
+                    <FormLabel className="text-[#fafafa]">Категория</FormLabel>
+                    <Select value={field.value ?? ''} onValueChange={field.onChange}>
+                      <FormControl>
+                        <SelectTrigger className="border-[#27272a] bg-[#18181b] text-[#fafafa]">
+                          <span className={`flex-1 text-left text-sm ${!selected ? 'text-[#71717a]' : ''}`}>
+                            {selected ? selected.name : 'Выберите категорию'}
+                          </span>
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent className="border-[#27272a] bg-[#18181b]">
+                        {categories.map((cat: any) => (
+                          <SelectItem
+                            key={cat.id}
+                            value={cat.id}
+                            className="text-[#fafafa] focus:bg-[#27272a]"
+                          >
+                            {cat.name}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    <FormMessage />
+                  </FormItem>
+                )
+              }}
             />
           )}
 
@@ -293,72 +321,91 @@ export function IncidentForm({ defaultValues, incidentId }: IncidentFormProps) {
           <FormField
             control={form.control}
             name="assigned_to"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel className="text-[#fafafa]">Назначен</FormLabel>
-                <Select
-                  onValueChange={(v) => field.onChange(v === '__none__' ? null : v)}
-                  defaultValue={field.value ?? '__none__'}
-                >
-                  <FormControl>
-                    <SelectTrigger className="border-[#27272a] bg-[#18181b] text-[#fafafa]">
-                      <SelectValue placeholder="Не назначен" />
-                    </SelectTrigger>
-                  </FormControl>
-                  <SelectContent className="border-[#27272a] bg-[#18181b]">
-                    <SelectItem value="__none__" className="text-[#71717a] focus:bg-[#27272a]">
-                      Не назначен
-                    </SelectItem>
-                    {users.map((user: any) => (
-                      <SelectItem
-                        key={user.id}
-                        value={user.id}
-                        className="text-[#fafafa] focus:bg-[#27272a]"
-                      >
-                        {user.first_name} {user.last_name}
+            render={({ field }) => {
+              const selected = field.value ? users.find((u: any) => u.id === field.value) : null
+              const displayName = selected
+                ? [selected.first_name, selected.last_name].filter(Boolean).join(' ')
+                : null
+              return (
+                <FormItem>
+                  <FormLabel className="text-[#fafafa]">Назначен</FormLabel>
+                  <Select
+                    value={field.value ?? '__none__'}
+                    onValueChange={(v) => field.onChange(v === '__none__' ? null : v)}
+                  >
+                    <FormControl>
+                      <SelectTrigger className="border-[#27272a] bg-[#18181b] text-[#fafafa]">
+                        <span className={`flex-1 text-left text-sm ${!displayName ? 'text-[#71717a]' : ''}`}>
+                          {displayName ?? 'Не назначен'}
+                        </span>
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent className="border-[#27272a] bg-[#18181b]">
+                      <SelectItem value="__none__" className="text-[#71717a] focus:bg-[#27272a]">
+                        Не назначен
                       </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-                <FormMessage />
-              </FormItem>
-            )}
+                      {users.map((user: any) => (
+                        <SelectItem
+                          key={user.id}
+                          value={user.id}
+                          className="text-[#fafafa] focus:bg-[#27272a]"
+                        >
+                          <span className="flex items-center gap-2">
+                            <span>{user.first_name} {user.last_name}</span>
+                            <span className="text-xs text-[#71717a]">
+                              {ROLE_LABELS[user.role as keyof typeof ROLE_LABELS] ?? user.role}
+                              {!user.is_active && ' · неактивен'}
+                            </span>
+                          </span>
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  <FormMessage />
+                </FormItem>
+              )
+            }}
           />
 
           {/* Vulnerability */}
           <FormField
             control={form.control}
             name="vulnerability_id"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel className="text-[#fafafa]">Уязвимость</FormLabel>
-                <Select
-                  onValueChange={(v) => field.onChange(v === '__none__' ? null : v)}
-                  defaultValue={field.value ?? '__none__'}
-                >
-                  <FormControl>
-                    <SelectTrigger className="border-[#27272a] bg-[#18181b] text-[#fafafa]">
-                      <SelectValue placeholder="Не выбрана" />
-                    </SelectTrigger>
-                  </FormControl>
-                  <SelectContent className="border-[#27272a] bg-[#18181b]">
-                    <SelectItem value="__none__" className="text-[#71717a] focus:bg-[#27272a]">
-                      Не выбрана
-                    </SelectItem>
-                    {vulnerabilities.map((vuln: any) => (
-                      <SelectItem
-                        key={vuln.id}
-                        value={vuln.id}
-                        className="text-[#fafafa] focus:bg-[#27272a]"
-                      >
-                        {vuln.name}
+            render={({ field }) => {
+              const selected = field.value ? vulnerabilities.find((v: any) => v.id === field.value) : null
+              return (
+                <FormItem>
+                  <FormLabel className="text-[#fafafa]">Уязвимость</FormLabel>
+                  <Select
+                    value={field.value ?? '__none__'}
+                    onValueChange={(v) => field.onChange(v === '__none__' ? null : v)}
+                  >
+                    <FormControl>
+                      <SelectTrigger className="border-[#27272a] bg-[#18181b] text-[#fafafa]">
+                        <span className={`flex-1 text-left text-sm ${!selected ? 'text-[#71717a]' : ''}`}>
+                          {selected ? selected.name : 'Не выбрана'}
+                        </span>
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent className="border-[#27272a] bg-[#18181b]">
+                      <SelectItem value="__none__" className="text-[#71717a] focus:bg-[#27272a]">
+                        Не выбрана
                       </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-                <FormMessage />
-              </FormItem>
-            )}
+                      {vulnerabilities.map((vuln: any) => (
+                        <SelectItem
+                          key={vuln.id}
+                          value={vuln.id}
+                          className="text-[#fafafa] focus:bg-[#27272a]"
+                        >
+                          {vuln.name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  <FormMessage />
+                </FormItem>
+              )
+            }}
           />
 
           {/* Occurred At — only for create */}

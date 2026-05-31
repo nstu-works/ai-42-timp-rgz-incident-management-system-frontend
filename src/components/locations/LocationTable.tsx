@@ -2,11 +2,9 @@
 
 import Link from 'next/link'
 import { ColumnDef } from '@tanstack/react-table'
+import { Eye, Pencil, Trash2 } from 'lucide-react'
 import { DataTable } from '@/components/shared/DataTable'
 import { Button } from '@/components/ui/button'
-
-const linkButtonClass =
-  'inline-flex items-center rounded px-2 py-1 text-xs font-medium text-[#a78bfa] transition-colors hover:bg-[#27272a]'
 
 export interface LocationRow {
   id: string
@@ -18,10 +16,11 @@ export interface LocationRow {
 interface LocationTableProps {
   data: LocationRow[]
   isLoading?: boolean
+  onEdit?: (id: string) => void
   onDelete?: (id: string) => void
 }
 
-export function LocationTable({ data, isLoading, onDelete }: LocationTableProps) {
+export function LocationTable({ data, isLoading, onEdit, onDelete }: LocationTableProps) {
   const columns: ColumnDef<LocationRow>[] = [
     {
       accessorKey: 'name',
@@ -38,6 +37,7 @@ export function LocationTable({ data, isLoading, onDelete }: LocationTableProps)
     {
       id: 'type',
       header: 'Тип',
+      accessorFn: (row) => row.location_type?.name ?? '',
       cell: ({ row }) => (
         <span className="text-[#fafafa]">{row.original.location_type?.name ?? '—'}</span>
       ),
@@ -51,19 +51,36 @@ export function LocationTable({ data, isLoading, onDelete }: LocationTableProps)
     },
     {
       id: 'actions',
+      enableSorting: false,
       cell: ({ row }) => (
-        <div className="flex gap-2">
-          <Link href={`/locations/${row.original.id}`} className={linkButtonClass}>
-            Открыть
+        <div className="flex items-center gap-1">
+          <Link
+            href={`/locations/${row.original.id}`}
+            title="Открыть"
+            className="inline-flex size-7 items-center justify-center rounded-md border border-[#27272a] text-[#a78bfa] transition-colors hover:bg-[#27272a] hover:text-[#c4b5fd]"
+          >
+            <Eye className="size-3.5" />
           </Link>
+          {onEdit && (
+            <Button
+              variant="ghost"
+              size="icon-sm"
+              title="Редактировать"
+              className="border border-[#27272a] text-[#a78bfa] hover:bg-[#27272a] hover:text-[#c4b5fd]"
+              onClick={() => onEdit(row.original.id)}
+            >
+              <Pencil className="size-3.5" />
+            </Button>
+          )}
           {onDelete && (
             <Button
               variant="ghost"
-              size="sm"
-              className="text-red-400 hover:text-red-300"
+              size="icon-sm"
+              title="Удалить"
+              className="border border-[#27272a] text-red-400 hover:bg-[#27272a] hover:text-red-300"
               onClick={() => onDelete(row.original.id)}
             >
-              Удалить
+              <Trash2 className="size-3.5" />
             </Button>
           )}
         </div>

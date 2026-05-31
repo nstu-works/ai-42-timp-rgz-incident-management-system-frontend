@@ -1,6 +1,7 @@
 'use client'
 
 import { use, useState } from 'react'
+import { useSearchParams } from 'next/navigation'
 import { PageContainer } from '@/components/layout/PageContainer'
 import { LocationForm } from '@/components/locations/LocationForm'
 import { Button } from '@/components/ui/button'
@@ -14,11 +15,11 @@ export default function LocationDetailPage({
 }) {
   const { id } = use(params)
   const { isAdmin } = useRole()
-  const [editing, setEditing] = useState(false)
+  const searchParams = useSearchParams()
+  const [editing, setEditing] = useState(searchParams.get('mode') === 'edit')
 
   const { data: locationData, isLoading } = useGetLocationV1LocationsLocIdGet(id)
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const location = (locationData as any)?.data
+  const location = (locationData as any)?.data?.data
 
   if (isLoading) {
     return (

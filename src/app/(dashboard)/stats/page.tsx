@@ -53,8 +53,8 @@ export default function StatsPage() {
     { query: { enabled: canViewStats } }
   )
 
-  const incidentCount = (countData as any)?.data?.count ?? 0
-  const vulns: TopVulnerability[] = (vulnData as any)?.data ?? []
+  const incidentCount = (countData as any)?.data?.data?.count ?? 0
+  const vulns: TopVulnerability[] = (vulnData as any)?.data?.data ?? []
 
   if (!canViewStats) {
     return (
