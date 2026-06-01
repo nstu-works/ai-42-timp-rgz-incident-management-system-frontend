@@ -24,6 +24,7 @@ interface DataTableProps<TData> {
   data: TData[]
   isLoading?: boolean
   emptyMessage?: string
+  initialSorting?: SortingState
 }
 
 export function DataTable<TData>({
@@ -31,8 +32,9 @@ export function DataTable<TData>({
   data,
   isLoading,
   emptyMessage = 'Нет данных',
+  initialSorting = [],
 }: DataTableProps<TData>) {
-  const [sorting, setSorting] = useState<SortingState>([])
+  const [sorting, setSorting] = useState<SortingState>(initialSorting)
 
   const table = useReactTable({
     data,
@@ -40,6 +42,7 @@ export function DataTable<TData>({
     getCoreRowModel: getCoreRowModel(),
     getSortedRowModel: getSortedRowModel(),
     onSortingChange: setSorting,
+    enableSortingRemoval: false,
     state: { sorting },
   })
 

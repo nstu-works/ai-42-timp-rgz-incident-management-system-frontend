@@ -84,7 +84,8 @@ export default function LoginPage() {
                   <FormControl>
                     <Input
                       type="password"
-                      className="border-[#27272a] bg-[#09090b] text-[#fafafa]"
+                      placeholder="••••••••"
+                      className="border-[#27272a] bg-[#09090b] text-[#fafafa] placeholder:text-[#52525b]"
                       {...field}
                     />
                   </FormControl>

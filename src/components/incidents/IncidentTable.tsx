@@ -150,6 +150,7 @@ export function IncidentTable({ data, isLoading, onEdit, onDelete }: IncidentTab
       data={data}
       isLoading={isLoading}
       emptyMessage="Инцидентов нет"
+      initialSorting={[{ id: 'occurred_at', desc: true }]}
     />
   )
 }
