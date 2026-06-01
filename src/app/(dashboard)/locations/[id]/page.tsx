@@ -81,11 +81,11 @@ export default function LocationDetailPage({
           </div>
           <div>
             <span className="text-[#71717a]">Тип: </span>
-            <span className="text-[#fafafa]">{location.location_type?.name ?? '—'}</span>
+            <span className="text-[#fafafa]">{location.location_type?.name ?? '-'}</span>
           </div>
           <div>
             <span className="text-[#71717a]">Адрес: </span>
-            <span className="text-[#fafafa]">{location.address ?? '—'}</span>
+            <span className="text-[#fafafa]">{location.address ?? '-'}</span>
           </div>
         </div>
       </div>

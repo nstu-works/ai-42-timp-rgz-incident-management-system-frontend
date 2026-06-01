@@ -133,7 +133,7 @@ export default function VulnerabilityDetailPage({
           )}
           <div>
             <span className="text-[#71717a]">Локация: </span>
-            <span className="text-[#fafafa]">{vulnerability.location?.name ?? '—'}</span>
+            <span className="text-[#fafafa]">{vulnerability.location?.name ?? '-'}</span>
           </div>
           <div>
             <span className="text-[#71717a]">Серьёзность: </span>

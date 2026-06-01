@@ -39,14 +39,14 @@ export function LocationTable({ data, isLoading, onEdit, onDelete }: LocationTab
       header: 'Тип',
       accessorFn: (row) => row.location_type?.name ?? '',
       cell: ({ row }) => (
-        <span className="text-[#fafafa]">{row.original.location_type?.name ?? '—'}</span>
+        <span className="text-[#fafafa]">{row.original.location_type?.name ?? '-'}</span>
       ),
     },
     {
       accessorKey: 'address',
       header: 'Адрес',
       cell: ({ row }) => (
-        <span className="text-[#a1a1aa]">{row.getValue('address') ?? '—'}</span>
+        <span className="text-[#a1a1aa]">{row.getValue('address') ?? '-'}</span>
       ),
     },
     {

@@ -106,18 +106,18 @@ export default function IncidentDetailPage({
             </div>
             <div>
               <span className="text-[#71717a]">Локация: </span>
-              <span className="text-[#fafafa]">{incident.location?.name ?? '—'}</span>
+              <span className="text-[#fafafa]">{incident.location?.name ?? '-'}</span>
             </div>
             <div>
               <span className="text-[#71717a]">Категория: </span>
-              <span className="text-[#fafafa]">{incident.category?.name ?? '—'}</span>
+              <span className="text-[#fafafa]">{incident.category?.name ?? '-'}</span>
             </div>
             <div>
               <span className="text-[#71717a]">Репортировал: </span>
               <span className="text-[#fafafa]">
                 {incident.reporter
                   ? [incident.reporter.first_name, incident.reporter.last_name].filter(Boolean).join(' ')
-                  : '—'}
+                  : '-'}
                 {incident.reporter?.role && (
                   <span className="ml-1 text-[#71717a]">
                     ({ROLE_LABELS[incident.reporter.role as keyof typeof ROLE_LABELS] ?? incident.reporter.role})

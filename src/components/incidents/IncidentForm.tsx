@@ -221,19 +221,19 @@ export function IncidentForm({ defaultValues, incidentId }: IncidentFormProps) {
                     <SelectTrigger className="border-[#27272a] bg-[#18181b] text-[#fafafa]">
                       <span className="flex-1 text-left text-sm">
                         {field.value
-                          ? `${field.value} — ${THREAT_LABELS[Number(field.value) - 1]}`
+                          ? `${field.value} - ${THREAT_LABELS[Number(field.value) - 1]}`
                           : <span className="text-[#71717a]">Выберите уровень</span>}
                       </span>
                     </SelectTrigger>
                   </FormControl>
-                  <SelectContent className="border-[#27272a] bg-[#18181b]">
+                  <SelectContent className="border-[#27272a] bg-[#18181b] min-w-[170px]">
                     {[1, 2, 3, 4, 5].map((level) => (
                       <SelectItem
                         key={level}
                         value={String(level)}
                         className="text-[#fafafa] focus:bg-[#27272a]"
                       >
-                        {level} — {THREAT_LABELS[level - 1]}
+                        {level} - {THREAT_LABELS[level - 1]}
                       </SelectItem>
                     ))}
                   </SelectContent>
@@ -340,7 +340,7 @@ export function IncidentForm({ defaultValues, incidentId }: IncidentFormProps) {
                         </span>
                       </SelectTrigger>
                     </FormControl>
-                    <SelectContent className="border-[#27272a] bg-[#18181b]">
+                    <SelectContent className="border-[#27272a] bg-[#18181b] min-w-[220px]">
                       <SelectItem value="__none__" className="text-[#71717a] focus:bg-[#27272a]">
                         Не назначен
                       </SelectItem>
@@ -350,7 +350,7 @@ export function IncidentForm({ defaultValues, incidentId }: IncidentFormProps) {
                           value={user.id}
                           className="text-[#fafafa] focus:bg-[#27272a]"
                         >
-                          <span className="flex items-center gap-2">
+                          <span className="flex flex-col gap-0.5">
                             <span>{user.first_name} {user.last_name}</span>
                             <span className="text-xs text-[#71717a]">
                               {ROLE_LABELS[user.role as keyof typeof ROLE_LABELS] ?? user.role}

@@ -60,7 +60,7 @@ export function IncidentTable({ data, isLoading, onEdit, onDelete }: IncidentTab
       accessorFn: (row) => row.location?.name ?? '',
       cell: ({ row }) => {
         const loc = row.original.location
-        if (!loc) return <span className="text-[#a1a1aa]">—</span>
+        if (!loc) return <span className="text-[#a1a1aa]">-</span>
         return (
           <Link href={`/locations/${loc.id}`} className="text-[#a78bfa] hover:underline">
             {loc.name}
@@ -74,7 +74,7 @@ export function IncidentTable({ data, isLoading, onEdit, onDelete }: IncidentTab
       accessorFn: (row) => row.category?.name ?? '',
       cell: ({ row }) => {
         const cat = row.original.category
-        if (!cat) return <span className="text-[#a1a1aa]">—</span>
+        if (!cat) return <span className="text-[#a1a1aa]">-</span>
         return (
           <Link href="/categories" className="text-[#a78bfa] hover:underline">
             {cat.name}
@@ -89,7 +89,7 @@ export function IncidentTable({ data, isLoading, onEdit, onDelete }: IncidentTab
         row.reporter ? `${row.reporter.first_name} ${row.reporter.last_name}` : '',
       cell: ({ row }) => {
         const r = row.original.reporter
-        if (!r) return <span className="text-[#a1a1aa]">—</span>
+        if (!r) return <span className="text-[#a1a1aa]">-</span>
         return (
           <Link href={`/users/${r.id}`} className="text-[#a78bfa] hover:underline">
             {r.first_name} {r.last_name}

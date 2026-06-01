@@ -69,7 +69,7 @@ export default function CategoriesPage() {
       accessorKey: 'description',
       header: 'Описание',
       cell: ({ row }) => (
-        <span className="text-[#a1a1aa]">{row.getValue('description') ?? '—'}</span>
+        <span className="text-[#a1a1aa]">{row.getValue('description') ?? '-'}</span>
       ),
     },
     {
