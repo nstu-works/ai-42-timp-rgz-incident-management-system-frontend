@@ -139,7 +139,7 @@ export const listUsersV1UsersGet = (
 
 
       return axiosInstance<BaseResponseListUser>(
-      {url: `/v1/users/`, method: 'GET', signal
+      {url: `/v1/users`, method: 'GET', signal
     },
       );
     }
@@ -149,7 +149,7 @@ export const listUsersV1UsersGet = (
 
 export const getListUsersV1UsersGetQueryKey = () => {
     return [
-    `/v1/users/`
+    `/v1/users`
     ] as const;
     }
 
@@ -231,7 +231,7 @@ export const createUserV1UsersPost = (
 
 
       return axiosInstance<BaseResponseUser>(
-      {url: `/v1/users/`, method: 'POST',
+      {url: `/v1/users`, method: 'POST',
       headers: {'Content-Type': 'application/json', },
       data: userCreate, signal
     },

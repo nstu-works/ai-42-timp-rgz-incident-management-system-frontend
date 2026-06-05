@@ -47,7 +47,7 @@ export const listLocationTypesV1LocationTypesGet = (
 
 
       return axiosInstance<BaseResponseListLocationType>(
-      {url: `/v1/location-types/`, method: 'GET', signal
+      {url: `/v1/location-types`, method: 'GET', signal
     },
       );
     }
@@ -57,7 +57,7 @@ export const listLocationTypesV1LocationTypesGet = (
 
 export const getListLocationTypesV1LocationTypesGetQueryKey = () => {
     return [
-    `/v1/location-types/`
+    `/v1/location-types`
     ] as const;
     }
 
@@ -139,7 +139,7 @@ export const createLocationTypeV1LocationTypesPost = (
 
 
       return axiosInstance<BaseResponseLocationType>(
-      {url: `/v1/location-types/`, method: 'POST',
+      {url: `/v1/location-types`, method: 'POST',
       headers: {'Content-Type': 'application/json', },
       data: locationTypeCreate, signal
     },

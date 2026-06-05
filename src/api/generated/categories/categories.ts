@@ -47,7 +47,7 @@ export const listCategoriesV1CategoriesGet = (
 
 
       return axiosInstance<BaseResponseListCategory>(
-      {url: `/v1/categories/`, method: 'GET', signal
+      {url: `/v1/categories`, method: 'GET', signal
     },
       );
     }
@@ -57,7 +57,7 @@ export const listCategoriesV1CategoriesGet = (
 
 export const getListCategoriesV1CategoriesGetQueryKey = () => {
     return [
-    `/v1/categories/`
+    `/v1/categories`
     ] as const;
     }
 
@@ -139,7 +139,7 @@ export const createCategoryV1CategoriesPost = (
 
 
       return axiosInstance<BaseResponseCategory>(
-      {url: `/v1/categories/`, method: 'POST',
+      {url: `/v1/categories`, method: 'POST',
       headers: {'Content-Type': 'application/json', },
       data: categoryCreate, signal
     },

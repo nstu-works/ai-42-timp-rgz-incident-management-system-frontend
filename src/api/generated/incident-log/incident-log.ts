@@ -39,7 +39,7 @@ export const listLogV1IncidentLogGet = (
 
 
       return axiosInstance<BaseResponseListIncidentLog>(
-      {url: `/v1/incident-log/`, method: 'GET', signal
+      {url: `/v1/incident-log`, method: 'GET', signal
     },
       );
     }
@@ -49,7 +49,7 @@ export const listLogV1IncidentLogGet = (
 
 export const getListLogV1IncidentLogGetQueryKey = () => {
     return [
-    `/v1/incident-log/`
+    `/v1/incident-log`
     ] as const;
     }
 

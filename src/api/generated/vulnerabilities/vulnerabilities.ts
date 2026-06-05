@@ -47,7 +47,7 @@ export const listVulnerabilitiesV1VulnerabilitiesGet = (
 
 
       return axiosInstance<BaseResponseListVulnerability>(
-      {url: `/v1/vulnerabilities/`, method: 'GET', signal
+      {url: `/v1/vulnerabilities`, method: 'GET', signal
     },
       );
     }
@@ -57,7 +57,7 @@ export const listVulnerabilitiesV1VulnerabilitiesGet = (
 
 export const getListVulnerabilitiesV1VulnerabilitiesGetQueryKey = () => {
     return [
-    `/v1/vulnerabilities/`
+    `/v1/vulnerabilities`
     ] as const;
     }
 
@@ -139,7 +139,7 @@ export const createVulnerabilityV1VulnerabilitiesPost = (
 
 
       return axiosInstance<BaseResponseVulnerability>(
-      {url: `/v1/vulnerabilities/`, method: 'POST',
+      {url: `/v1/vulnerabilities`, method: 'POST',
       headers: {'Content-Type': 'application/json', },
       data: vulnerabilityCreate, signal
     },

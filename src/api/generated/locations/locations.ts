@@ -47,7 +47,7 @@ export const listLocationsV1LocationsGet = (
 
 
       return axiosInstance<BaseResponseListLocation>(
-      {url: `/v1/locations/`, method: 'GET', signal
+      {url: `/v1/locations`, method: 'GET', signal
     },
       );
     }
@@ -57,7 +57,7 @@ export const listLocationsV1LocationsGet = (
 
 export const getListLocationsV1LocationsGetQueryKey = () => {
     return [
-    `/v1/locations/`
+    `/v1/locations`
     ] as const;
     }
 
@@ -139,7 +139,7 @@ export const createLocationV1LocationsPost = (
 
 
       return axiosInstance<BaseResponseLocation>(
-      {url: `/v1/locations/`, method: 'POST',
+      {url: `/v1/locations`, method: 'POST',
       headers: {'Content-Type': 'application/json', },
       data: locationCreate, signal
     },

@@ -53,7 +53,7 @@ export const listIncidentsV1IncidentsGet = (
 
 
       return axiosInstance<BaseResponseListIncident>(
-      {url: `/v1/incidents/`, method: 'GET', signal
+      {url: `/v1/incidents`, method: 'GET', signal
     },
       );
     }
@@ -63,7 +63,7 @@ export const listIncidentsV1IncidentsGet = (
 
 export const getListIncidentsV1IncidentsGetQueryKey = () => {
     return [
-    `/v1/incidents/`
+    `/v1/incidents`
     ] as const;
     }
 
@@ -145,7 +145,7 @@ export const createIncidentV1IncidentsPost = (
 
 
       return axiosInstance<BaseResponseIncident>(
-      {url: `/v1/incidents/`, method: 'POST',
+      {url: `/v1/incidents`, method: 'POST',
       headers: {'Content-Type': 'application/json', },
       data: incidentCreate, signal
     },
@@ -636,6 +636,105 @@ export const useDeletePhotoV1IncidentsIncidentIdPhotosPhotoIdDelete = <TError = 
       return useMutation(getDeletePhotoV1IncidentsIncidentIdPhotosPhotoIdDeleteMutationOptions(options), queryClient);
     }
     /**
+ * @summary Get Photo File
+ */
+export const getPhotoFileV1IncidentsIncidentIdPhotosPhotoIdFileGet = (
+    incidentId: string,
+    photoId: string,
+ signal?: AbortSignal
+) => {
+
+
+      return axiosInstance<unknown>(
+      {url: `/v1/incidents/${incidentId}/photos/${photoId}/file`, method: 'GET', signal
+    },
+      );
+    }
+
+
+
+
+export const getGetPhotoFileV1IncidentsIncidentIdPhotosPhotoIdFileGetQueryKey = (incidentId: string,
+    photoId: string,) => {
+    return [
+    `/v1/incidents/${incidentId}/photos/${photoId}/file`
+    ] as const;
+    }
+
+
+export const getGetPhotoFileV1IncidentsIncidentIdPhotosPhotoIdFileGetQueryOptions = <TData = Awaited<ReturnType<typeof getPhotoFileV1IncidentsIncidentIdPhotosPhotoIdFileGet>>, TError = HTTPValidationError>(incidentId: string,
+    photoId: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getPhotoFileV1IncidentsIncidentIdPhotosPhotoIdFileGet>>, TError, TData>>, }
+) => {
+
+const {query: queryOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetPhotoFileV1IncidentsIncidentIdPhotosPhotoIdFileGetQueryKey(incidentId,photoId);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getPhotoFileV1IncidentsIncidentIdPhotosPhotoIdFileGet>>> = ({ signal }) => getPhotoFileV1IncidentsIncidentIdPhotosPhotoIdFileGet(incidentId,photoId, signal);
+
+
+
+
+
+   return  { queryKey, queryFn, enabled: incidentId !== null && incidentId !== undefined && photoId !== null && photoId !== undefined, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getPhotoFileV1IncidentsIncidentIdPhotosPhotoIdFileGet>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type GetPhotoFileV1IncidentsIncidentIdPhotosPhotoIdFileGetQueryResult = NonNullable<Awaited<ReturnType<typeof getPhotoFileV1IncidentsIncidentIdPhotosPhotoIdFileGet>>>
+export type GetPhotoFileV1IncidentsIncidentIdPhotosPhotoIdFileGetQueryError = HTTPValidationError
+
+
+export function useGetPhotoFileV1IncidentsIncidentIdPhotosPhotoIdFileGet<TData = Awaited<ReturnType<typeof getPhotoFileV1IncidentsIncidentIdPhotosPhotoIdFileGet>>, TError = HTTPValidationError>(
+ incidentId: string,
+    photoId: string, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof getPhotoFileV1IncidentsIncidentIdPhotosPhotoIdFileGet>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getPhotoFileV1IncidentsIncidentIdPhotosPhotoIdFileGet>>,
+          TError,
+          Awaited<ReturnType<typeof getPhotoFileV1IncidentsIncidentIdPhotosPhotoIdFileGet>>
+        > , 'initialData'
+      >, }
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetPhotoFileV1IncidentsIncidentIdPhotosPhotoIdFileGet<TData = Awaited<ReturnType<typeof getPhotoFileV1IncidentsIncidentIdPhotosPhotoIdFileGet>>, TError = HTTPValidationError>(
+ incidentId: string,
+    photoId: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getPhotoFileV1IncidentsIncidentIdPhotosPhotoIdFileGet>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getPhotoFileV1IncidentsIncidentIdPhotosPhotoIdFileGet>>,
+          TError,
+          Awaited<ReturnType<typeof getPhotoFileV1IncidentsIncidentIdPhotosPhotoIdFileGet>>
+        > , 'initialData'
+      >, }
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetPhotoFileV1IncidentsIncidentIdPhotosPhotoIdFileGet<TData = Awaited<ReturnType<typeof getPhotoFileV1IncidentsIncidentIdPhotosPhotoIdFileGet>>, TError = HTTPValidationError>(
+ incidentId: string,
+    photoId: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getPhotoFileV1IncidentsIncidentIdPhotosPhotoIdFileGet>>, TError, TData>>, }
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+/**
+ * @summary Get Photo File
+ */
+
+export function useGetPhotoFileV1IncidentsIncidentIdPhotosPhotoIdFileGet<TData = Awaited<ReturnType<typeof getPhotoFileV1IncidentsIncidentIdPhotosPhotoIdFileGet>>, TError = HTTPValidationError>(
+ incidentId: string,
+    photoId: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getPhotoFileV1IncidentsIncidentIdPhotosPhotoIdFileGet>>, TError, TData>>, }
+ , queryClient?: QueryClient
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getGetPhotoFileV1IncidentsIncidentIdPhotosPhotoIdFileGetQueryOptions(incidentId,photoId,options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+
+
+
+
+
+/**
  * @summary List Responses
  */
 export const listResponsesV1IncidentsIncidentIdResponsesGet = (
