@@ -1,6 +1,10 @@
 'use client'
 
 import { useRef, useState } from 'react'
+import Lightbox from 'yet-another-react-lightbox'
+import Zoom from 'yet-another-react-lightbox/plugins/zoom'
+import 'yet-another-react-lightbox/styles.css'
+import { ZoomIn } from 'lucide-react'
 import { axiosInstance, BASE_URL } from '@/lib/axios'
 import { Button } from '@/components/ui/button'
 import { useQueryClient } from '@tanstack/react-query'
@@ -22,7 +26,12 @@ export function PhotoUpload({ incidentId, photos }: PhotoUploadProps) {
   const inputRef = useRef<HTMLInputElement>(null)
   const [uploading, setUploading] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [lightboxIndex, setLightboxIndex] = useState(-1)
   const queryClient = useQueryClient()
+
+  const slides = photos.map((photo) => ({
+    src: `${BASE_URL}/v1/incidents/${incidentId}/photos/${photo.id}/file`,
+  }))
 
   async function handleUpload(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0]
@@ -82,18 +91,31 @@ export function PhotoUpload({ incidentId, photos }: PhotoUploadProps) {
           </>
         )}
       </div>
+
       {error && <p className="text-sm text-red-400">{error}</p>}
+
       {photos.length === 0 ? (
         <p className="text-sm text-[#71717a]">Фотографий нет</p>
       ) : (
         <div className="grid grid-cols-3 gap-3">
-          {photos.map((photo) => (
+          {photos.map((photo, index) => (
             <div key={photo.id} className="group relative">
-              <img
-                src={`${BASE_URL}/v1/incidents/${incidentId}/photos/${photo.id}/file`}
-                alt="Фото инцидента"
-                className="h-32 w-full rounded object-cover border border-[#27272a]"
-              />
+              <button
+                type="button"
+                className="block w-full focus:outline-none"
+                onClick={() => setLightboxIndex(index)}
+                aria-label="Открыть фото"
+              >
+                <img
+                  src={`${BASE_URL}/v1/incidents/${incidentId}/photos/${photo.id}/file`}
+                  alt="Фото инцидента"
+                  className="h-32 w-full rounded object-cover border border-[#27272a] transition-opacity group-hover:opacity-75"
+                />
+                <span className="pointer-events-none absolute inset-0 flex items-center justify-center opacity-0 transition-opacity group-hover:opacity-100">
+                  <ZoomIn className="h-6 w-6 text-white drop-shadow-lg" />
+                </span>
+              </button>
+
               {canDelete && (
                 <button
                   onClick={() => handleDelete(photo.id)}
@@ -106,6 +128,16 @@ export function PhotoUpload({ incidentId, photos }: PhotoUploadProps) {
           ))}
         </div>
       )}
+
+      <Lightbox
+        open={lightboxIndex >= 0}
+        close={() => setLightboxIndex(-1)}
+        index={lightboxIndex}
+        slides={slides}
+        plugins={[Zoom]}
+        zoom={{ maxZoomPixelRatio: 4, scrollToZoom: true }}
+        styles={{ root: { '--yarl__color_backdrop': 'rgba(0, 0, 0, 0.9)' } }}
+      />
     </div>
   )
 }
