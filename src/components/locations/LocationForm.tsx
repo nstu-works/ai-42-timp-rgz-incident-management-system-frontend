@@ -82,6 +82,7 @@ export function LocationForm({ defaultValues, locationId }: LocationFormProps) {
           address: values.address ?? null,
         }
         await createMutation.mutateAsync({ data: createData })
+        await queryClient.invalidateQueries({ queryKey: getListLocationsV1LocationsGetQueryKey() })
         toast.success('Локация создана')
       }
       router.push('/locations')

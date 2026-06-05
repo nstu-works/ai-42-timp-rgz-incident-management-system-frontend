@@ -114,6 +114,7 @@ export function IncidentForm({ defaultValues, incidentId }: IncidentFormProps) {
           occurred_at: values.occurred_at,
         }
         await createMutation.mutateAsync({ data: createData })
+        await queryClient.invalidateQueries({ queryKey: getListIncidentsV1IncidentsGetQueryKey() })
         toast.success('Инцидент создан')
       }
       router.push('/incidents')

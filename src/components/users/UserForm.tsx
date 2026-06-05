@@ -103,6 +103,7 @@ export function UserForm({ defaultValues, userId }: UserFormProps) {
           role: v.role as UserRole,
         }
         await createMutation.mutateAsync({ data: createData })
+        await queryClient.invalidateQueries({ queryKey: getListUsersV1UsersGetQueryKey() })
         toast.success('Пользователь создан')
       }
       router.push('/users')
