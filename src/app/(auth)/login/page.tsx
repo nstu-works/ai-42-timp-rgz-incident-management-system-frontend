@@ -5,7 +5,7 @@ import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
-import axios from 'axios'
+import axiosInstance from '@/lib/axios'
 import { useAuthStore } from '@/store/auth'
 import { getMeV1UsersMeGet } from '@/api/generated/users/users'
 import { loginSchema, type LoginFormValues } from '@/schemas/auth'
@@ -33,8 +33,8 @@ export default function LoginPage() {
   async function onSubmit(values: LoginFormValues) {
     setError(null)
     try {
-      const { data } = await axios.post(
-        'http://localhost:8000/api/v1/auth/login',
+      const { data } = await axiosInstance.post(
+        '/v1/auth/login',
         values,
         { withCredentials: true }
       )

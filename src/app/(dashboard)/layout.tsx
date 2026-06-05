@@ -3,7 +3,7 @@
 
 import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
-import axios from 'axios'
+import axiosInstance from '@/lib/axios'
 import { useAuthStore } from '@/store/auth'
 import { getMeV1UsersMeGet } from '@/api/generated/users/users'
 import { Sidebar } from '@/components/layout/Sidebar'
@@ -24,8 +24,8 @@ export default function DashboardLayout({
         let token = accessToken
 
         if (!token) {
-          const { data } = await axios.post(
-            'http://localhost:8000/api/v1/auth/refresh',
+          const { data } = await axiosInstance.post(
+            '/v1/auth/refresh',
             {},
             { withCredentials: true }
           )
