@@ -25,6 +25,7 @@ import {
   SelectItem,
   SelectTrigger,
 } from '@/components/ui/select'
+import { DateTimePicker } from '@/components/ui/date-time-picker'
 import { ErrorAlert } from '@/components/shared/ErrorAlert'
 import {
   useCreateIncidentV1IncidentsPost,
@@ -253,7 +254,10 @@ export function IncidentForm({ defaultValues, incidentId }: IncidentFormProps) {
                 return (
                   <FormItem>
                     <FormLabel className="text-[#fafafa]">Локация</FormLabel>
-                    <Select value={field.value ?? ''} onValueChange={field.onChange}>
+                    <Select
+                      value={field.value || '__none__'}
+                      onValueChange={(v) => field.onChange(v === '__none__' ? '' : v)}
+                    >
                       <FormControl>
                         <SelectTrigger className="border-[#27272a] bg-[#18181b] text-[#fafafa]">
                           <span className={`flex-1 text-left text-sm ${!selected ? 'text-[#71717a]' : ''}`}>
@@ -262,6 +266,9 @@ export function IncidentForm({ defaultValues, incidentId }: IncidentFormProps) {
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent className="border-[#27272a] bg-[#18181b]">
+                        <SelectItem value="__none__" className="text-[#71717a] focus:bg-[#27272a]">
+                          Не выбрана
+                        </SelectItem>
                         {locations.map((loc: any) => (
                           <SelectItem
                             key={loc.id}
@@ -290,7 +297,10 @@ export function IncidentForm({ defaultValues, incidentId }: IncidentFormProps) {
                 return (
                   <FormItem>
                     <FormLabel className="text-[#fafafa]">Категория</FormLabel>
-                    <Select value={field.value ?? ''} onValueChange={field.onChange}>
+                    <Select
+                      value={field.value || '__none__'}
+                      onValueChange={(v) => field.onChange(v === '__none__' ? '' : v)}
+                    >
                       <FormControl>
                         <SelectTrigger className="border-[#27272a] bg-[#18181b] text-[#fafafa]">
                           <span className={`flex-1 text-left text-sm ${!selected ? 'text-[#71717a]' : ''}`}>
@@ -299,6 +309,9 @@ export function IncidentForm({ defaultValues, incidentId }: IncidentFormProps) {
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent className="border-[#27272a] bg-[#18181b]">
+                        <SelectItem value="__none__" className="text-[#71717a] focus:bg-[#27272a]">
+                          Не выбрана
+                        </SelectItem>
                         {categories.map((cat: any) => (
                           <SelectItem
                             key={cat.id}
@@ -417,11 +430,7 @@ export function IncidentForm({ defaultValues, incidentId }: IncidentFormProps) {
                 <FormItem>
                   <FormLabel className="text-[#fafafa]">Дата и время инцидента</FormLabel>
                   <FormControl>
-                    <Input
-                      type="datetime-local"
-                      className="border-[#27272a] bg-[#18181b] text-[#fafafa]"
-                      {...field}
-                    />
+                    <DateTimePicker value={field.value} onChange={field.onChange} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
