@@ -6,13 +6,19 @@ import { usePathname } from 'next/navigation'
 import { useAuthStore } from '@/store/auth'
 import {
   AlertTriangle,
-  Shield,
-  MapPin,
-  Tag,
-  Users,
   FileText,
+  MapPin,
+  Shield,
+  Tag,
+  UserCheck,
+  Users,
 } from 'lucide-react'
 import type { UserRole } from '@/types'
+import {
+  getGetGuestCountV1UsersGuestCountGetQueryKey,
+  getGuestCountV1UsersGuestCountGet,
+} from '@/api/generated/users/users'
+import { useQuery } from '@tanstack/react-query'
 
 const NAV_ITEMS: {
   href: string
@@ -51,6 +57,12 @@ const NAV_ITEMS: {
     roles: ['operator', 'admin'],
   },
   {
+    href: '/users/pending',
+    label: 'Заявки',
+    icon: UserCheck,
+    roles: ['admin'],
+  },
+  {
     href: '/audit',
     label: 'Аудит',
     icon: FileText,
@@ -61,15 +73,25 @@ const NAV_ITEMS: {
 export function Sidebar() {
   const pathname = usePathname()
   const role = useAuthStore((s) => s.user?.role)
+  const isAdmin = role === 'admin'
 
-  const visible = NAV_ITEMS.filter(
-    (item) => role && item.roles.includes(role)
-  )
+  const { data: guestCountData } = useQuery({
+    queryKey: getGetGuestCountV1UsersGuestCountGetQueryKey(),
+    queryFn: ({ signal }) => getGuestCountV1UsersGuestCountGet(signal),
+    enabled: isAdmin,
+    refetchInterval: 30_000,
+  })
+  const guestCount: number = (guestCountData as any)?.data?.data?.count ?? 0
+
+  const visible = NAV_ITEMS.filter((item) => role && item.roles.includes(role))
 
   return (
     <aside className="flex w-60 flex-shrink-0 flex-col border-r border-[#27272a] bg-[#18181b]">
       <div className="flex h-14 items-center border-b border-[#27272a] px-4">
-        <Link href="/" className="text-lg font-semibold text-[#a78bfa] hover:text-[#c4b5fd] transition-colors">
+        <Link
+          href="/"
+          className="text-lg font-semibold text-[#a78bfa] hover:text-[#c4b5fd] transition-colors"
+        >
           IMS
         </Link>
       </div>
@@ -77,6 +99,9 @@ export function Sidebar() {
         {visible.map((item) => {
           const Icon = item.icon
           const active = pathname.startsWith(item.href)
+          const showBadge =
+            item.href === '/users' && isAdmin && guestCount > 0
+
           return (
             <Link
               key={item.href}
@@ -89,6 +114,11 @@ export function Sidebar() {
             >
               <Icon size={16} />
               {item.label}
+              {showBadge && (
+                <span className="ml-auto flex h-5 min-w-5 items-center justify-center rounded bg-red-600 px-1 text-xs font-bold text-white">
+                  {guestCount > 99 ? '99+' : guestCount}
+                </span>
+              )}
             </Link>
           )
         })}
