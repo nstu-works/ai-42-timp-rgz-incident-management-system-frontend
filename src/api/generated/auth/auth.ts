@@ -211,3 +211,23 @@ export const useLogoutV1AuthLogoutPost = <TError = unknown,
       > => {
       return useMutation(getLogoutV1AuthLogoutPostMutationOptions(options), queryClient);
     }
+
+// Register — manual addition
+export const registerV1AuthRegisterPost = (
+  data: {
+    email: string
+    password: string
+    first_name: string
+    last_name: string
+    surname?: string
+  },
+  signal?: AbortSignal
+) => {
+  return axiosInstance<BaseResponseTokenResponse>({
+    url: `/v1/auth/register`,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    data,
+    signal,
+  })
+}

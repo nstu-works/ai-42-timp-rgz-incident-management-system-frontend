@@ -501,3 +501,115 @@ export const useDeleteUserV1UsersUserIdDelete = <TError = HTTPValidationError,
       > => {
       return useMutation(getDeleteUserV1UsersUserIdDeleteMutationOptions(options), queryClient);
     }
+
+// Guest count — manual addition
+export const getGuestCountV1UsersGuestCountGet = (signal?: AbortSignal) => {
+  return axiosInstance<{ success: boolean; msg: string; data: { count: number } }>({
+    url: `/v1/users/guest-count`,
+    method: 'GET',
+    signal,
+  })
+}
+
+export const getGetGuestCountV1UsersGuestCountGetQueryKey = () =>
+  [`/v1/users/guest-count`] as const
+
+export function useGetGuestCountV1UsersGuestCountGet<
+  TData = Awaited<ReturnType<typeof getGuestCountV1UsersGuestCountGet>>,
+  TError = unknown
+>(
+  options?: {
+    query?: Partial<
+      UseQueryOptions<Awaited<ReturnType<typeof getGuestCountV1UsersGuestCountGet>>, TError, TData>
+    >
+  },
+  queryClient?: QueryClient
+): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+  const { query: queryOptions } = options ?? {}
+  const queryKey =
+    queryOptions?.queryKey ?? getGetGuestCountV1UsersGuestCountGetQueryKey()
+  const queryFn: QueryFunction<
+    Awaited<ReturnType<typeof getGuestCountV1UsersGuestCountGet>>
+  > = ({ signal }) => getGuestCountV1UsersGuestCountGet(signal)
+  const query = useQuery(
+    { queryKey, queryFn, ...queryOptions },
+    queryClient
+  ) as UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+  return { ...query, queryKey: queryKey as DataTag<QueryKey, TData, TError> }
+}
+
+// Approve user — manual addition
+export const approveUserV1UsersUserIdApprovePost = (
+  userId: string,
+  data: { role: string },
+  signal?: AbortSignal
+) => {
+  return axiosInstance<BaseResponseUser>({
+    url: `/v1/users/${userId}/approve`,
+    method: 'PATCH',
+    headers: { 'Content-Type': 'application/json' },
+    data,
+    signal,
+  })
+}
+
+export const getApproveUserV1UsersUserIdApprovePostMutationOptions = <
+  TError = unknown,
+  TContext = unknown
+>(
+  options?: {
+    mutation?: UseMutationOptions<
+      Awaited<ReturnType<typeof approveUserV1UsersUserIdApprovePost>>,
+      TError,
+      { userId: string; data: { role: string } },
+      TContext
+    >
+  }
+): UseMutationOptions<
+  Awaited<ReturnType<typeof approveUserV1UsersUserIdApprovePost>>,
+  TError,
+  { userId: string; data: { role: string } },
+  TContext
+> => {
+  const mutationKey = ['approveUserV1UsersUserIdApprovePost']
+  const { mutation: mutationOptions } = options
+    ? options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey
+      ? options
+      : { ...options, mutation: { ...options.mutation, mutationKey } }
+    : { mutation: { mutationKey } }
+
+  const mutationFn: MutationFunction<
+    Awaited<ReturnType<typeof approveUserV1UsersUserIdApprovePost>>,
+    { userId: string; data: { role: string } }
+  > = (props) => {
+    const { userId, data } = props ?? {}
+    return approveUserV1UsersUserIdApprovePost(userId, data)
+  }
+
+  return { mutationFn, ...mutationOptions }
+}
+
+export const useApproveUserV1UsersUserIdApprovePost = <
+  TError = unknown,
+  TContext = unknown
+>(
+  options?: {
+    mutation?: UseMutationOptions<
+      Awaited<ReturnType<typeof approveUserV1UsersUserIdApprovePost>>,
+      TError,
+      { userId: string; data: { role: string } },
+      TContext
+    >
+  },
+  queryClient?: QueryClient
+): UseMutationResult<
+  Awaited<ReturnType<typeof approveUserV1UsersUserIdApprovePost>>,
+  TError,
+  { userId: string; data: { role: string } },
+  TContext
+> => {
+  return useMutation(
+    getApproveUserV1UsersUserIdApprovePostMutationOptions(options),
+    queryClient
+  )
+}
