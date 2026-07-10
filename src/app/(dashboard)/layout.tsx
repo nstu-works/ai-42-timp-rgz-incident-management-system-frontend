@@ -34,7 +34,12 @@ export default function DashboardLayout({
         }
 
         const meRes = await getMeV1UsersMeGet()
-        setAuth(token!, (meRes as any).data.data)
+        const userData = (meRes as any).data.data
+        setAuth(token!, userData)
+        if (userData.role === 'guest') {
+          router.push('/pending')
+          return
+        }
         setReady(true)
       } catch {
         router.push('/login')
