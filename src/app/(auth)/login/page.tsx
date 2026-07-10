@@ -2,6 +2,7 @@
 'use client'
 
 import { useState } from 'react'
+import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
@@ -101,6 +102,12 @@ export default function LoginPage() {
             >
               {form.formState.isSubmitting ? 'Вход...' : 'Войти'}
             </Button>
+            <p className="text-center text-sm text-[#71717a]">
+              Нет аккаунта?{' '}
+              <Link href="/register" className="text-[#a78bfa] hover:underline">
+                Зарегистрироваться
+              </Link>
+            </p>
           </form>
         </Form>
       </div>
