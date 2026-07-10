@@ -5,7 +5,7 @@ export interface ApiResponse<T> {
   data: T
 }
 
-export type UserRole = 'guard' | 'operator' | 'analyst' | 'admin'
+export type UserRole = 'guest' | 'guard' | 'operator' | 'analyst' | 'admin'
 
 export interface AuthUser {
   id: string

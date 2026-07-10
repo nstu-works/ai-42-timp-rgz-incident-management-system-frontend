@@ -5,6 +5,7 @@ export function useRole() {
   const role = useAuthStore((s) => s.user?.role)
   return {
     role,
+    isGuest: role === 'guest',
     isGuard: role === 'guard',
     isOperator: role === 'operator',
     isAnalyst: role === 'analyst',
