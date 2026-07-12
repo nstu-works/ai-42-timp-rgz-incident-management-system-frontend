@@ -1,14 +1,30 @@
 // src/app/pending/page.tsx
 'use client'
 
+import { useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import axiosInstance from '@/lib/axios'
 import { useAuthStore } from '@/store/auth'
 import { Button } from '@/components/ui/button'
+import { useGetMeV1UsersMeGet } from '@/api/generated/users/users'
 
 export default function PendingPage() {
   const router = useRouter()
   const clear = useAuthStore((s) => s.clear)
+  const accessToken = useAuthStore((s) => s.accessToken)
+  const setAuth = useAuthStore((s) => s.setAuth)
+
+  const { data: meData } = useGetMeV1UsersMeGet({
+    query: { refetchInterval: 5000, staleTime: 0 },
+  })
+
+  useEffect(() => {
+    const user = (meData as any)?.data?.data
+    if (user && user.role !== 'guest' && accessToken) {
+      setAuth(accessToken, user)
+      router.replace('/stats')
+    }
+  }, [meData, accessToken, setAuth, router])
 
   async function handleLogout() {
     try {
