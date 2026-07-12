@@ -85,6 +85,10 @@ export function Sidebar() {
 
   const visible = NAV_ITEMS.filter((item) => role && item.roles.includes(role))
 
+  const activeHref = visible
+    .filter((item) => pathname === item.href || pathname.startsWith(item.href + '/'))
+    .sort((a, b) => b.href.length - a.href.length)[0]?.href
+
   return (
     <aside className="flex w-60 flex-shrink-0 flex-col border-r border-[#27272a] bg-[#18181b]">
       <div className="flex h-14 items-center border-b border-[#27272a] px-4">
@@ -98,9 +102,9 @@ export function Sidebar() {
       <nav className="flex-1 space-y-1 p-2">
         {visible.map((item) => {
           const Icon = item.icon
-          const active = pathname.startsWith(item.href)
+          const active = item.href === activeHref
           const showBadge =
-            item.href === '/users' && isAdmin && guestCount > 0
+            item.href === '/users/pending' && isAdmin && guestCount > 0
 
           return (
             <Link
